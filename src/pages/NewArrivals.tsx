@@ -33,7 +33,7 @@ const NewArrivals = () => {
             id: 5,
             name: 'Off-White x Nike Air Force 1',
             price: '$2,000',
-            imageUrl: 'https://via.placeholder.com/300x200?text=Off-White+Nike',
+            imageUrl: 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/odhlk8ksqmstmdcjjyn0/W+AF1+SHADOW.png',
         },
     ];
 
