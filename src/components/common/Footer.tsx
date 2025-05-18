@@ -1,6 +1,6 @@
 import React from 'react';
 import { Facebook, Instagram, Twitter } from 'lucide-react';
-import { Link } from './Link';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -86,7 +86,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/authentication" className="text-gray-400 hover:text-primary transition-colors">
+                <Link to="/auth" className="text-gray-400 hover:text-primary transition-colors">
                   Authentication
                 </Link>
               </li>

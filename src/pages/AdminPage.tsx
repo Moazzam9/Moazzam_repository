@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Users, BarChart3, Settings, Plus, Trash, Edit, Eye, CheckCircle } from 'lucide-react';
+import { ShoppingBag, Users, BarChart3, Settings, Plus, Trash, Edit, Eye, CheckCircle, LogOut, X } from 'lucide-react';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import Button from '../components/common/Button';
 import { Product } from '../types';
 import { productService } from '../services/productService';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState<'products' | 'addProduct' | 'dashboard'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'addProduct' | 'dashboard' | 'customers'>('products');
   const [productList, setProductList] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
@@ -24,6 +26,17 @@ const AdminPage = () => {
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Product>>({});
+  const [customers, setCustomers] = useState<{ name: string; email: string }[]>([]);
+
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   useEffect(() => {
     loadProducts();
@@ -41,6 +54,15 @@ const AdminPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadCustomers = async () => {
+    // TODO: Replace with real orderService.getAllOrders()
+    // Mock data for demonstration
+    setCustomers([
+      { name: 'John Doe', email: 'john@example.com' },
+      { name: 'Jane Smith', email: 'jane@example.com' },
+    ]);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -189,7 +211,11 @@ const AdminPage = () => {
               </li>
               <li>
                 <button
-                  className="w-full text-left px-4 py-2 rounded flex items-center text-light hover:bg-dark"
+                  onClick={() => {
+                    setActiveTab('customers');
+                    loadCustomers();
+                  }}
+                  className={`w-full text-left px-4 py-2 rounded flex items-center ${activeTab === 'customers' ? 'bg-primary text-dark' : 'text-light hover:bg-dark'}`}
                 >
                   <Users size={18} className="mr-2" />
                   Customers
@@ -201,6 +227,15 @@ const AdminPage = () => {
                 >
                   <Settings size={18} className="mr-2" />
                   Settings
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 rounded flex items-center text-primary hover:bg-primary/10 mt-4 transition-colors"
+                >
+                  <LogOut size={18} className="mr-2" />
+                  Logout
                 </button>
               </li>
             </ul>
@@ -325,7 +360,14 @@ const AdminPage = () => {
                                 <button className="p-1 text-gray-400 hover:text-primary" title="View">
                                   <Eye size={16} />
                                 </button>
-                                <button className="p-1 text-gray-400 hover:text-primary" title="Edit">
+                                <button
+                                  className="p-1 text-gray-400 hover:text-primary"
+                                  title="Edit"
+                                  onClick={() => {
+                                    setEditingProduct(product);
+                                    setEditForm({ ...product });
+                                  }}
+                                >
                                   <Edit size={16} />
                                 </button>
                                 <button
@@ -490,9 +532,174 @@ const AdminPage = () => {
                 </form>
               </div>
             )}
+
+            {activeTab === 'customers' && (
+              <div className="bg-secondary rounded-lg p-6">
+                <h2 className="font-display text-xl text-light mb-6">Customers</h2>
+                <table className="w-full text-left">
+                  <thead>
+                    <tr>
+                      <th className="pb-2 font-medium text-gray-400">Name</th>
+                      <th className="pb-2 font-medium text-gray-400">Email</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {customers.map((customer) => (
+                      <tr key={customer.email}>
+                        <td className="py-2 text-light">{customer.name}</td>
+                        <td className="py-2 text-light">{customer.email}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {editingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-secondary p-6 rounded-lg w-full max-w-lg relative flex flex-col max-h-[90vh]">
+            <button
+              className="absolute top-4 right-4 text-gray-400 hover:text-primary"
+              onClick={() => setEditingProduct(null)}
+            >
+              <X size={24} />
+            </button>
+            <h2 className="font-display text-xl text-primary mb-4">Edit Product</h2>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  setLoading(true);
+                  await productService.updateProduct(editingProduct.id, editForm);
+                  setEditingProduct(null);
+                  await loadProducts();
+                } catch (err) {
+                  setError('Failed to update product');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="flex flex-col flex-1 overflow-y-auto gap-4 pr-2"
+              style={{ maxHeight: '65vh' }}
+            >
+              <div>
+                <label className="block text-gray-300 mb-1">Product Name</label>
+                <input
+                  type="text"
+                  value={editForm.name || ''}
+                  onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">Brand</label>
+                <input
+                  type="text"
+                  value={editForm.brand || ''}
+                  onChange={e => setEditForm({ ...editForm, brand: e.target.value })}
+                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">Category</label>
+                <select
+                  value={editForm.category || ''}
+                  onChange={e => setEditForm({ ...editForm, category: e.target.value })}
+                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                  required
+                >
+                  <option value="sneakers">Sneakers</option>
+                  <option value="watches">Watches</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">Size</label>
+                <input
+                  type="text"
+                  value={editForm.size || ''}
+                  onChange={e => setEditForm({ ...editForm, size: e.target.value })}
+                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">Price ($)</label>
+                <input
+                  type="number"
+                  value={editForm.price || ''}
+                  onChange={e => setEditForm({ ...editForm, price: parseFloat(e.target.value) })}
+                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">Original Price ($)</label>
+                <input
+                  type="number"
+                  value={editForm.originalPrice || ''}
+                  onChange={e => setEditForm({ ...editForm, originalPrice: parseFloat(e.target.value) })}
+                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">Condition</label>
+                <select
+                  value={editForm.condition || ''}
+                  onChange={e => setEditForm({ ...editForm, condition: e.target.value })}
+                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                  required
+                >
+                  <option value="new">New</option>
+                  <option value="like new">Like New</option>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Good</option>
+                  <option value="fair">Fair</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">Image URL</label>
+                <input
+                  type="text"
+                  value={editForm.images?.[0] || ''}
+                  onChange={e => setEditForm({ ...editForm, images: [e.target.value] })}
+                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">Description</label>
+                <textarea
+                  value={editForm.description || ''}
+                  onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none h-24"
+                />
+              </div>
+              <div className="flex justify-end space-x-3 sticky bottom-0 bg-secondary pt-4 pb-2 z-10">
+                <Button
+                  variant="outline"
+                  onClick={() => setEditingProduct(null)}
+                  type="button"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
