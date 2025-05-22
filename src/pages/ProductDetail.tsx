@@ -226,38 +226,37 @@ const ProductDetail = () => {
 
                             {/* SIZE GRID START */}
                             <div>
-                              <div className="flex items-center justify-between mb-2">
-                                <h2 className="text-lg font-medium text-light">Select Size</h2>
-                                <button className="flex items-center text-primary text-sm" type="button">
-                                  <span className="mr-1">↔️</span>
-                                  Size Guide
-                                </button>
-                              </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-4">
-                                {Array.isArray(product.size) && product.size.length > 0 ? (
-                                  product.size.map((size) => (
-                                    <button
-                                      key={size}
-                                      type="button"
-                                      onClick={() => setSelectedSize(size)}
-                                      className={`border px-4 py-2 rounded transition-colors ${
-                                        selectedSize === size
-                                          ? 'border-primary bg-primary/10 text-primary'
-                                          : 'border-gray-700 text-light hover:border-primary/50'
-                                      }`}
-                                    >
-                                      {size}
+                                <div className="flex items-center justify-between mb-2">
+                                    <h2 className="text-lg font-medium text-light">Select Size</h2>
+                                    <button className="flex items-center text-primary text-sm" type="button">
+                                        <span className="mr-1">↔️</span>
+                                        Size Guide
                                     </button>
-                                  ))
-                                ) : (
-                                  <span className="text-gray-400">No sizes available</span>
-                                )}
-                              </div>
-                              {selectedSize && (
-                                <div className="mb-2 text-gray-400">
-                                  Selected Size: <span className="text-light">{selectedSize}</span>
                                 </div>
-                              )}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-4">
+                                    {Array.isArray(product.size) && product.size.length > 0 ? (
+                                        product.size.map((size) => (
+                                            <button
+                                                key={size}
+                                                type="button"
+                                                onClick={() => setSelectedSize(size)}
+                                                className={`border px-4 py-2 rounded transition-colors ${selectedSize === size
+                                                        ? 'border-primary bg-primary/10 text-primary'
+                                                        : 'border-gray-700 text-light hover:border-primary/50'
+                                                    }`}
+                                            >
+                                                {size}
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <span className="text-gray-400">No sizes available</span>
+                                    )}
+                                </div>
+                                {selectedSize && (
+                                    <div className="mb-2 text-gray-400">
+                                        Selected Size: <span className="text-light">{selectedSize}</span>
+                                    </div>
+                                )}
                             </div>
                             {/* SIZE GRID END */}
 
@@ -304,7 +303,11 @@ const ProductDetail = () => {
                                 >
                                     <Heart size={20} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
                                 </button>
-                                <button className="p-3 bg-gray-800 text-light rounded-md hover:bg-gray-700 transition-colors">
+                                <button
+                                    className="p-3 bg-gray-800 text-light rounded-md hover:bg-gray-700 transition-colors"
+                                    onClick={() => window.open('http://moazzamportfolio.great-site.net/', '_blank')}
+                                    aria-label="Share"
+                                >
                                     <Share2 size={20} />
                                 </button>
                             </div>

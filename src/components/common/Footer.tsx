@@ -13,13 +13,13 @@ const Footer = () => {
               Your destination for authentic pre-owned luxury sneakers and watches.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-light hover:text-primary transition-colors">
+              <a href="http://moazzamportfolio.great-site.net/" target="_blank" rel="noopener noreferrer" className="text-light hover:text-primary transition-colors">
                 <Facebook size={20} />
               </a>
-              <a href="#" className="text-light hover:text-primary transition-colors">
+              <a href="http://moazzamportfolio.great-site.net/" target="_blank" rel="noopener noreferrer" className="text-light hover:text-primary transition-colors">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="text-light hover:text-primary transition-colors">
+              <a href="http://moazzamportfolio.great-site.net/" target="_blank" rel="noopener noreferrer" className="text-light hover:text-primary transition-colors">
                 <Twitter size={20} />
               </a>
             </div>
