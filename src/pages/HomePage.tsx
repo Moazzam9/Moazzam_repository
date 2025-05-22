@@ -21,6 +21,14 @@ const HomePage = () => {
     loadProducts();
   }, []);
 
+  const getMillis = (createdAt) => {
+    if (!createdAt) return 0;
+    if (typeof createdAt.toMillis === 'function') return createdAt.toMillis();
+    if (typeof createdAt === 'string') return new Date(createdAt).getTime();
+    if (createdAt instanceof Date) return createdAt.getTime();
+    return 0;
+  };
+
   const loadProducts = async () => {
     try {
       setLoading(true);
@@ -39,7 +47,7 @@ const HomePage = () => {
 
       // Get newest products from all categories
       const allProducts = [...sneakersList, ...watchesList]
-        .sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0))
+        .sort((a, b) => getMillis(b.createdAt) - getMillis(a.createdAt))
         .slice(0, 4);
       setNewArrivals(allProducts);
     } catch (err) {

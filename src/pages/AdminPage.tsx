@@ -427,7 +427,7 @@ const AdminPage = () => {
                         required
                       />
                     </div>
-                  </div>
+                    </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -455,7 +455,7 @@ const AdminPage = () => {
                         required
                       />
                     </div>
-                  </div>
+                    </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -483,35 +483,35 @@ const AdminPage = () => {
                         step="0.01"
                       />
                     </div>
-                  </div>
+                    </div>
 
-                  <div>
+                    <div>
                     <label htmlFor="condition" className="block text-gray-400 text-sm font-medium mb-1">Condition</label>
-                    <select
+                      <select
                       id="condition"
-                      name="condition"
-                      value={newProduct.condition}
-                      onChange={handleInputChange}
+                        name="condition"
+                        value={newProduct.condition}
+                        onChange={handleInputChange}
                       className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary appearance-none pr-8"
-                      required
-                    >
-                      <option value="new">New</option>
-                      <option value="like new">Like New</option>
-                      <option value="excellent">Excellent</option>
-                      <option value="good">Good</option>
-                      <option value="fair">Fair</option>
-                    </select>
-                  </div>
+                        required
+                      >
+                        <option value="new">New</option>
+                        <option value="like new">Like New</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                      </select>
+                    </div>
 
-                  <div>
+                    <div>
                     <label htmlFor="images" className="block text-gray-400 text-sm font-medium mb-1">Image URLs (comma-separated)</label>
-                    <textarea
+                      <textarea
                       id="images"
-                      name="images"
+                        name="images"
                       value={newProduct.images.join(', ')}
-                      onChange={handleImageInputChange}
+                        onChange={handleImageInputChange}
                       className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary h-24"
-                      required
+                        required
                     />
                   </div>
 
@@ -582,11 +582,11 @@ const AdminPage = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="font-display text-xl text-light">Edit Product</h2>
               <button onClick={() => setEditingProduct(null)} className="text-gray-400 hover:text-primary">
-                <X size={24} />
-              </button>
+              <X size={24} />
+            </button>
             </div>
             <form onSubmit={(e) => {
-              e.preventDefault();
+                e.preventDefault();
               // Handle edit submission
               const updatedProduct = {
                 ...editingProduct,
@@ -613,85 +613,85 @@ const AdminPage = () => {
                 });
             }} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div>
                   <label htmlFor="edit-name" className="block text-gray-400 text-sm font-medium mb-1">Product Name</label>
-                  <input
-                    type="text"
+                <input
+                  type="text"
                     id="edit-name"
                     name="name"
-                    value={editForm.name || ''}
+                  value={editForm.name || ''}
                     onChange={handleEditInputChange}
                     className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
-                    required
-                  />
-                </div>
-                <div>
+                  required
+                />
+              </div>
+              <div>
                   <label htmlFor="edit-brand" className="block text-gray-400 text-sm font-medium mb-1">Brand</label>
-                  <input
-                    type="text"
+                <input
+                  type="text"
                     id="edit-brand"
                     name="brand"
-                    value={editForm.brand || ''}
+                  value={editForm.brand || ''}
                     onChange={handleEditInputChange}
                     className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
-                    required
-                  />
+                  required
+                />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div>
                   <label htmlFor="edit-category" className="block text-gray-400 text-sm font-medium mb-1">Category</label>
-                  <select
+                <select
                     id="edit-category"
-                    name="category"
+                  name="category"
                     value={editForm.category || ''}
-                    onChange={handleEditInputChange}
+                  onChange={handleEditInputChange}
                     className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary appearance-none pr-8"
-                    required
-                  >
-                    <option value="sneakers">Sneakers</option>
-                    <option value="watches">Watches</option>
-                  </select>
-                </div>
-                <div>
+                  required
+                >
+                  <option value="sneakers">Sneakers</option>
+                  <option value="watches">Watches</option>
+                </select>
+              </div>
+              <div>
                   <label htmlFor="edit-size" className="block text-gray-400 text-sm font-medium mb-1">Size (comma-separated)</label>
                   <textarea
                     id="edit-size"
-                    name="size"
+                  name="size"
                     value={Array.isArray(editForm.size) ? editForm.size.join(', ') : (editForm.size || '')}
-                    onChange={handleEditInputChange}
+                  onChange={handleEditInputChange}
                     className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary h-20"
-                    required
-                  />
+                  required
+                />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div>
                   <label htmlFor="edit-price" className="block text-gray-400 text-sm font-medium mb-1">Price ($)</label>
-                  <input
-                    type="number"
+                <input
+                  type="number"
                     id="edit-price"
-                    name="price"
+                  name="price"
                     value={editForm.price || 0}
-                    onChange={handleEditInputChange}
+                  onChange={handleEditInputChange}
                     className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
                     required
-                    step="0.01"
-                  />
-                </div>
-                <div>
+                  step="0.01"
+                />
+              </div>
+              <div>
                   <label htmlFor="edit-originalPrice" className="block text-gray-400 text-sm font-medium mb-1">Original Price ($)</label>
-                  <input
-                    type="number"
+                <input
+                  type="number"
                     id="edit-originalPrice"
-                    name="originalPrice"
+                  name="originalPrice"
                     value={editForm.originalPrice || 0}
-                    onChange={handleEditInputChange}
+                  onChange={handleEditInputChange}
                     className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
-                    step="0.01"
-                  />
+                  step="0.01"
+                />
                 </div>
               </div>
 

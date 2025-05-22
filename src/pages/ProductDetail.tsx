@@ -8,6 +8,7 @@ import { productService } from '../services/productService';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useAuth } from '../contexts/AuthContext';
+import Button from '../components/common/Button';
 
 const ProductDetail = () => {
     const { id } = useParams<{ id: string }>();
@@ -15,11 +16,12 @@ const ProductDetail = () => {
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedImage, setSelectedImage] = useState(0);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [selectedSize, setSelectedSize] = useState<string>('');
     const [quantity, setQuantity] = useState(1);
     const { addToCart } = useCart();
     const { addToWishlist, isInWishlist, removeFromWishlist } = useWishlist();
-    const { currentUser } = useAuth();
+    const { currentUser, showAuthModal } = useAuth();
 
     useEffect(() => {
         loadProduct();
@@ -31,6 +33,10 @@ const ProductDetail = () => {
             setError(null);
             const productData = await productService.getProductById(id!);
             setProduct(productData);
+            // Set default size if available
+            if (productData.size && Array.isArray(productData.size) && productData.size.length > 0) {
+                setSelectedSize(productData.size[0]);
+            }
         } catch (err) {
             setError('Failed to load product');
             console.error(err);
@@ -46,9 +52,26 @@ const ProductDetail = () => {
     };
 
     const handleAddToCart = () => {
-        if (product) {
-            addToCart(product, quantity);
+        if (!currentUser) {
+            showAuthModal();
+            return;
         }
+
+        if (!product) return;
+
+        if (!selectedSize) {
+            setError('Please select a size');
+            return;
+        }
+
+        addToCart({
+            ...product,
+            size: selectedSize,
+            quantity
+        });
+
+        // Show success message or navigate to cart
+        navigate('/cart');
     };
 
     const handleWishlistToggle = () => {
@@ -61,15 +84,15 @@ const ProductDetail = () => {
         }
     };
 
-    const handleNextImage = () => {
-        if (product && selectedImage < product.images.length - 1) {
-            setSelectedImage(selectedImage + 1);
+    const nextImage = () => {
+        if (product && currentImageIndex < product.images.length - 1) {
+            setCurrentImageIndex(currentImageIndex + 1);
         }
     };
 
-    const handlePrevImage = () => {
-        if (selectedImage > 0) {
-            setSelectedImage(selectedImage - 1);
+    const prevImage = () => {
+        if (currentImageIndex > 0) {
+            setCurrentImageIndex(currentImageIndex - 1);
         }
     };
 
@@ -89,12 +112,14 @@ const ProductDetail = () => {
             <div className="bg-dark text-light min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-red-500 mb-4">{error || 'Product not found'}</p>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="bg-primary text-dark px-6 py-2 rounded-md hover:bg-accent transition-colors"
+                    <Button
+                        variant="primary"
+                        size="md"
+                        onClick={() => navigate('/')}
+                        className="mt-4"
                     >
-                        Go Back
-                    </button>
+                        Return to Home
+                    </Button>
                 </div>
             </div>
         );
@@ -127,7 +152,7 @@ const ProductDetail = () => {
                         <div className="space-y-4">
                             <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-800">
                                 <img
-                                    src={product.images[selectedImage]}
+                                    src={product.images[currentImageIndex]}
                                     alt={product.name}
                                     className="w-full h-full object-cover"
                                 />
@@ -135,18 +160,18 @@ const ProductDetail = () => {
                                 {product.images.length > 1 && (
                                     <div className="absolute inset-0 flex items-center justify-between px-4">
                                         <button
-                                            onClick={handlePrevImage}
-                                            disabled={selectedImage === 0}
-                                            className={`p-2 rounded-full bg-dark/50 text-light hover:bg-dark/70 transition-colors ${selectedImage === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                                            onClick={prevImage}
+                                            disabled={currentImageIndex === 0}
+                                            className={`p-2 rounded-full bg-dark/50 text-light hover:bg-dark/70 transition-colors ${currentImageIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''
                                                 }`}
                                             aria-label="Previous image"
                                         >
                                             <ChevronLeft size={24} />
                                         </button>
                                         <button
-                                            onClick={handleNextImage}
-                                            disabled={selectedImage === product.images.length - 1}
-                                            className={`p-2 rounded-full bg-dark/50 text-light hover:bg-dark/70 transition-colors ${selectedImage === product.images.length - 1 ? 'opacity-50 cursor-not-allowed' : ''
+                                            onClick={nextImage}
+                                            disabled={currentImageIndex === product.images.length - 1}
+                                            className={`p-2 rounded-full bg-dark/50 text-light hover:bg-dark/70 transition-colors ${currentImageIndex === product.images.length - 1 ? 'opacity-50 cursor-not-allowed' : ''
                                                 }`}
                                             aria-label="Next image"
                                         >
@@ -171,8 +196,8 @@ const ProductDetail = () => {
                                 {product.images.map((image, index) => (
                                     <button
                                         key={index}
-                                        onClick={() => setSelectedImage(index)}
-                                        className={`aspect-square rounded-lg overflow-hidden ${selectedImage === index ? 'ring-2 ring-primary' : ''
+                                        onClick={() => setCurrentImageIndex(index)}
+                                        className={`aspect-square rounded-lg overflow-hidden ${currentImageIndex === index ? 'ring-2 ring-primary' : ''
                                             }`}
                                     >
                                         <img
@@ -199,14 +224,47 @@ const ProductDetail = () => {
                                 )}
                             </div>
 
-                            <div className="space-y-4">
-                                <div className="flex items-center space-x-4 text-gray-400">
-                                    <span>Condition: <span className="text-light">{product.condition}</span></span>
-                                    <span>•</span>
-                                    <span>Size: <span className="text-light">{product.size}</span></span>
+                            {/* SIZE GRID START */}
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <h2 className="text-lg font-medium text-light">Select Size</h2>
+                                <button className="flex items-center text-primary text-sm" type="button">
+                                  <span className="mr-1">↔️</span>
+                                  Size Guide
+                                </button>
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-4">
+                                {Array.isArray(product.size) && product.size.length > 0 ? (
+                                  product.size.map((size) => (
+                                    <button
+                                      key={size}
+                                      type="button"
+                                      onClick={() => setSelectedSize(size)}
+                                      className={`border px-4 py-2 rounded transition-colors ${
+                                        selectedSize === size
+                                          ? 'border-primary bg-primary/10 text-primary'
+                                          : 'border-gray-700 text-light hover:border-primary/50'
+                                      }`}
+                                    >
+                                      {size}
+                                    </button>
+                                  ))
+                                ) : (
+                                  <span className="text-gray-400">No sizes available</span>
+                                )}
+                              </div>
+                              {selectedSize && (
+                                <div className="mb-2 text-gray-400">
+                                  Selected Size: <span className="text-light">{selectedSize}</span>
                                 </div>
-                                <p className="text-gray-400">{product.description}</p>
+                              )}
                             </div>
+                            {/* SIZE GRID END */}
+
+                            <div className="flex items-center space-x-4 text-gray-400">
+                                <span>Condition: <span className="text-light">{product.condition}</span></span>
+                            </div>
+                            <p className="text-gray-400">{product.description}</p>
 
                             <div className="flex items-center space-x-4">
                                 <div className="flex items-center border border-gray-700 rounded-md">

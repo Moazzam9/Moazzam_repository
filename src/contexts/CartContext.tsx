@@ -1,64 +1,44 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, CartItem } from '../types';
+import { Product } from '../types';
 import { useAuth } from './AuthContext';
 
+interface CartItem extends Product {
+  quantity: number;
+  size: string;
+}
+
 interface CartContextType {
-  cartItems: CartItem[];
-  addToCart: (product: Product, quantity: number) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  items: CartItem[];
+  addToCart: (product: Product & { size: string; quantity: number }) => void;
+  removeFromCart: (productId: string, size: string) => void;
+  updateQuantity: (productId: string, size: string, quantity: number) => void;
   clearCart: () => void;
-  getCartTotal: () => number;
+  getTotalItems: () => number;
+  getTotalPrice: () => number;
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
   pendingCartAction: (() => void) | null;
 }
 
-const CartContext = createContext<CartContextType>({
-  cartItems: [],
-  addToCart: () => { },
-  removeFromCart: () => { },
-  updateQuantity: () => { },
-  clearCart: () => { },
-  getCartTotal: () => 0,
-  showAuthModal: false,
-  setShowAuthModal: () => { },
-  pendingCartAction: null,
-});
-
-export const useCart = () => useContext(CartContext);
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>([]);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingCartAction, setPendingCartAction] = useState<(() => void) | null>(null);
   const { currentUser } = useAuth();
 
-  // Load cart from localStorage on initial render
   useEffect(() => {
-    if (currentUser) {
-      const savedCart = localStorage.getItem(`cart_${currentUser.uid}`);
+    const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-      try {
-        setCartItems(JSON.parse(savedCart));
-      } catch (error) {
-        console.error('Error parsing cart data:', error);
-        setCartItems([]);
-      }
+      setItems(JSON.parse(savedCart));
     }
-    } else {
-      setCartItems([]);
-    }
-  }, [currentUser]);
+  }, []);
 
-  // Save cart to localStorage whenever it changes
   useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem(`cart_${currentUser.uid}`, JSON.stringify(cartItems));
-    }
-  }, [cartItems, currentUser]);
+    localStorage.setItem('cart', JSON.stringify(items));
+  }, [items]);
 
-  // Execute pending cart action after successful authentication
   useEffect(() => {
     if (currentUser && pendingCartAction) {
       pendingCartAction();
@@ -66,49 +46,51 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [currentUser, pendingCartAction]);
 
-  const addToCart = (product: Product, quantity: number) => {
+  const addToCart = (product: Product & { size: string; quantity: number }) => {
     if (!currentUser) {
-      setPendingCartAction(() => () => addToCart(product, quantity));
+      setPendingCartAction(() => () => addToCart(product));
       setShowAuthModal(true);
       return;
     }
 
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.product.id === product.id);
+    setItems(prevItems => {
+      const existingItemIndex = prevItems.findIndex(
+        item => item.id === product.id && item.size === product.size
+      );
 
-      if (existingItem) {
-        return prevItems.map(item =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      } else {
-        return [...prevItems, { product, quantity }];
+      if (existingItemIndex > -1) {
+        const updatedItems = [...prevItems];
+        updatedItems[existingItemIndex].quantity += product.quantity;
+        return updatedItems;
       }
+
+      return [...prevItems, { ...product, quantity: product.quantity }];
     });
   };
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = (productId: string, size: string) => {
     if (!currentUser) {
       setShowAuthModal(true);
       return;
     }
-    setCartItems(prevItems => prevItems.filter(item => item.product.id !== productId));
+    setItems(prevItems => prevItems.filter(item => !(item.id === productId && item.size === size)));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (productId: string, size: string, quantity: number) => {
     if (!currentUser) {
       setShowAuthModal(true);
       return;
     }
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, size);
       return;
     }
 
-    setCartItems(prevItems =>
+    setItems(prevItems =>
       prevItems.map(item =>
-        item.product.id === productId ? { ...item, quantity } : item
+        item.id === productId && item.size === size
+          ? { ...item, quantity: Math.max(1, quantity) }
+          : item
       )
     );
   };
@@ -118,22 +100,27 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setShowAuthModal(true);
       return;
     }
-    setCartItems([]);
+    setItems([]);
   };
 
-  const getCartTotal = () => {
-    return cartItems.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+  const getTotalItems = () => {
+    return items.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const getTotalPrice = () => {
+    return items.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
   return (
     <CartContext.Provider
       value={{
-        cartItems,
+        items,
         addToCart,
         removeFromCart,
         updateQuantity,
         clearCart,
-        getCartTotal,
+        getTotalItems,
+        getTotalPrice,
         showAuthModal,
         setShowAuthModal,
         pendingCartAction
@@ -142,4 +129,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </CartContext.Provider>
   );
+};
+
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
 };

@@ -13,7 +13,7 @@ const Header = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const { cartItems } = useCart();
+  const { items } = useCart();
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -44,7 +44,7 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showUserMenu]);
 
-  const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const totalItems = items.reduce((total, item) => total + item.quantity, 0);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
