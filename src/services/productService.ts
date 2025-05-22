@@ -42,6 +42,13 @@ export const productService = {
             .sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0)) as Product[];
     },
 
+    // Get a product by ID
+    async getProductById(id: string): Promise<Product | null> {
+        const snapshot = await get(ref(rtdb, `${PRODUCTS_PATH}/${id}`));
+        const data = snapshot.val();
+        return data ? data as Product : null;
+    },
+
     // Delete a product
     async deleteProduct(id: string): Promise<void> {
         await remove(ref(rtdb, `${PRODUCTS_PATH}/${id}`));

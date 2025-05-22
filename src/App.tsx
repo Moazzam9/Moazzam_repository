@@ -21,6 +21,7 @@ import Careers from './pages/Careers';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Account from './pages/Account';
+import ProductDetail from './pages/ProductDetail';
 
 function AppContent() {
   const { showAuthModal, setShowAuthModal } = useCart();
@@ -50,6 +51,7 @@ function AppContent() {
         <Route path="/careers" element={<Careers />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />

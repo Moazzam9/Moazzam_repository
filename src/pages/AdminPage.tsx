@@ -81,34 +81,44 @@ const AdminPage = () => {
     }
   };
 
+  const handleImageInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const imageUrls = e.target.value.split(',').map(url => url.trim()).filter(url => url !== '');
+    setNewProduct(prev => ({
+      ...prev,
+      images: imageUrls
+    }));
+  };
+
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setEditForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleEditImageInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const imageUrls = e.target.value.split(',').map(url => url.trim()).filter(url => url !== '');
+    setEditForm(prev => ({
+      ...prev,
+      images: imageUrls
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    // Ensure images array is not empty
+    if (!newProduct.images || newProduct.images.length === 0) {
+      setError('At least one image URL is required.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      setError(null);
-      setLoading(true);
-
-      // Validate required fields
-      if (!newProduct.name || !newProduct.brand || !newProduct.category || !newProduct.price) {
-        throw new Error('Please fill in all required fields');
-      }
-
-      // Ensure price is a positive number
-      if (newProduct.price <= 0) {
-        throw new Error('Price must be greater than 0');
-      }
-
-      // Ensure original price is greater than or equal to price
-      if (newProduct.originalPrice && newProduct.originalPrice < newProduct.price) {
-        throw new Error('Original price cannot be less than current price');
-      }
-
       await productService.addProduct(newProduct as Omit<Product, 'id'>);
-
-      // Show success message
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-
-      // Reset form
       setNewProduct({
         name: '',
         brand: '',
@@ -117,14 +127,14 @@ const AdminPage = () => {
         originalPrice: 0,
         condition: 'good',
         size: '',
-        images: ['https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg'],
+        images: [''], // Reset to a single empty string for the textarea
         description: '',
         authenticated: true,
       });
-
-      // Reload products
-      await loadProducts();
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
       setActiveTab('products');
+      await loadProducts();
     } catch (err) {
       console.error('Error adding product:', err);
       setError(err instanceof Error ? err.message : 'Failed to add product');
@@ -365,7 +375,7 @@ const AdminPage = () => {
                                   title="Edit"
                                   onClick={() => {
                                     setEditingProduct(product);
-                                    setEditForm({ ...product });
+                                    setEditForm({ ...product, images: product.images.join(', ') });
                                   }}
                                 >
                                   <Edit size={16} />
@@ -491,16 +501,15 @@ const AdminPage = () => {
                     </div>
 
                     <div>
-                      <label className="block text-gray-300 mb-1">Image URL</label>
-                      <input
-                        type="text"
-                        name="imageUrl"
-                        value={newProduct.images?.[0] || ''}
-                        onChange={(e) => setNewProduct({ ...newProduct, images: [e.target.value] })}
+                      <label className="block text-gray-300 mb-1">Image URLs (comma-separated)</label>
+                      <textarea
+                        name="images"
+                        value={newProduct.images?.join(', ') || ''}
+                        onChange={handleImageInputChange}
                         className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                        placeholder="https://example.com/image.jpg"
+                        rows={3}
                         required
-                      />
+                      ></textarea>
                     </div>
                   </div>
 
@@ -515,20 +524,21 @@ const AdminPage = () => {
                     />
                   </div>
 
-                  <div className="flex justify-end space-x-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => setActiveTab('products')}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      variant="primary"
-                    >
-                      Add Product
-                    </Button>
+                  <div className="flex items-center mb-6">
+                    <input
+                      type="checkbox"
+                      name="authenticated"
+                      checked={newProduct.authenticated}
+                      onChange={(e) => setNewProduct({ ...newProduct, authenticated: e.target.checked })}
+                      className="mr-2"
+                      id="authenticated-checkbox"
+                    />
+                    <label htmlFor="authenticated-checkbox" className="text-gray-300">Authenticated</label>
                   </div>
+
+                  <Button type="submit" variant="primary" loading={loading}>
+                    Add Product
+                  </Button>
                 </form>
               </div>
             )}
@@ -571,9 +581,26 @@ const AdminPage = () => {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
+                // Ensure images array is not empty in edit form
+                if (!editForm.images || (Array.isArray(editForm.images) && editForm.images.length === 0) || (typeof editForm.images === 'string' && editForm.images.trim() === '')) {
+                  setError('At least one image URL is required.');
+                  return;
+                }
+
+                // Convert comma-separated string back to array if it's a string
+                const imagesToSend = typeof editForm.images === 'string'
+                  ? editForm.images.split(',').map(url => url.trim()).filter(url => url !== '')
+                  : editForm.images;
+
+                // Ensure imagesToSend is an array and not empty
+                if (!Array.isArray(imagesToSend) || imagesToSend.length === 0) {
+                  setError('At least one valid image URL is required.');
+                  return;
+                }
+
                 try {
                   setLoading(true);
-                  await productService.updateProduct(editingProduct.id, editForm);
+                  await productService.updateProduct(editingProduct.id, { ...editForm, images: imagesToSend });
                   setEditingProduct(null);
                   await loadProducts();
                 } catch (err) {
@@ -605,11 +632,13 @@ const AdminPage = () => {
                   required
                 />
               </div>
+
               <div>
                 <label className="block text-gray-300 mb-1">Category</label>
                 <select
-                  value={editForm.category || ''}
-                  onChange={e => setEditForm({ ...editForm, category: e.target.value })}
+                  name="category"
+                  value={editForm.category}
+                  onChange={handleEditInputChange}
                   className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
                   required
                 >
@@ -617,43 +646,53 @@ const AdminPage = () => {
                   <option value="watches">Watches</option>
                 </select>
               </div>
+
               <div>
                 <label className="block text-gray-300 mb-1">Size</label>
                 <input
                   type="text"
+                  name="size"
                   value={editForm.size || ''}
-                  onChange={e => setEditForm({ ...editForm, size: e.target.value })}
+                  onChange={handleEditInputChange}
                   className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                  required
                 />
               </div>
+
               <div>
                 <label className="block text-gray-300 mb-1">Price ($)</label>
                 <input
                   type="number"
+                  name="price"
                   value={editForm.price || ''}
-                  onChange={e => setEditForm({ ...editForm, price: parseFloat(e.target.value) })}
+                  onChange={handleEditInputChange}
                   className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
                   min="0"
                   step="0.01"
                   required
                 />
               </div>
+
               <div>
                 <label className="block text-gray-300 mb-1">Original Price ($)</label>
                 <input
                   type="number"
+                  name="originalPrice"
                   value={editForm.originalPrice || ''}
-                  onChange={e => setEditForm({ ...editForm, originalPrice: parseFloat(e.target.value) })}
+                  onChange={handleEditInputChange}
                   className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
                   min="0"
                   step="0.01"
+                  required
                 />
               </div>
+
               <div>
                 <label className="block text-gray-300 mb-1">Condition</label>
                 <select
-                  value={editForm.condition || ''}
-                  onChange={e => setEditForm({ ...editForm, condition: e.target.value })}
+                  name="condition"
+                  value={editForm.condition}
+                  onChange={handleEditInputChange}
                   className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
                   required
                 >
@@ -664,38 +703,47 @@ const AdminPage = () => {
                   <option value="fair">Fair</option>
                 </select>
               </div>
+
               <div>
-                <label className="block text-gray-300 mb-1">Image URL</label>
-                <input
-                  type="text"
-                  value={editForm.images?.[0] || ''}
-                  onChange={e => setEditForm({ ...editForm, images: [e.target.value] })}
+                <label className="block text-gray-300 mb-1">Image URLs (comma-separated)</label>
+                {/* Check if editForm.images is an array before joining */}
+                <textarea
+                  name="images"
+                  value={Array.isArray(editForm.images) ? editForm.images.join(', ') : editForm.images || ''}
+                  onChange={handleEditImageInputChange}
                   className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                />
+                  rows={3}
+                  required
+                ></textarea>
               </div>
-              <div>
+
+              <div className="mb-6">
                 <label className="block text-gray-300 mb-1">Description</label>
                 <textarea
+                  name="description"
                   value={editForm.description || ''}
-                  onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none h-24"
+                  onChange={handleEditInputChange}
+                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                  rows={4}
+                  required
+                ></textarea>
+              </div>
+
+              <div className="flex items-center mb-6">
+                <input
+                  type="checkbox"
+                  name="authenticated"
+                  checked={editForm.authenticated || false}
+                  onChange={(e) => setEditForm({ ...editForm, authenticated: e.target.checked })}
+                  className="mr-2"
+                  id="edit-authenticated-checkbox"
                 />
+                <label htmlFor="edit-authenticated-checkbox" className="text-gray-300">Authenticated</label>
               </div>
-              <div className="flex justify-end space-x-3 sticky bottom-0 bg-secondary pt-4 pb-2 z-10">
-                <Button
-                  variant="outline"
-                  onClick={() => setEditingProduct(null)}
-                  type="button"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                >
-                  Save Changes
-                </Button>
-              </div>
+
+              <Button type="submit" variant="primary" loading={loading}>
+                Save Changes
+              </Button>
             </form>
           </div>
         </div>
