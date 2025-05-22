@@ -401,143 +401,151 @@ const AdminPage = () => {
             {activeTab === 'addProduct' && (
               <div className="bg-secondary rounded-lg p-6">
                 <h2 className="font-display text-xl text-light mb-6">Add New Product</h2>
-
-                <form onSubmit={handleSubmit}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-gray-300 mb-1">Product Name</label>
+                      <label htmlFor="name" className="block text-gray-400 text-sm font-medium mb-1">Product Name</label>
                       <input
                         type="text"
+                        id="name"
                         name="name"
                         value={newProduct.name}
                         onChange={handleInputChange}
-                        className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                        className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
                         required
                       />
                     </div>
-
                     <div>
-                      <label className="block text-gray-300 mb-1">Brand</label>
+                      <label htmlFor="brand" className="block text-gray-400 text-sm font-medium mb-1">Brand</label>
                       <input
                         type="text"
+                        id="brand"
                         name="brand"
                         value={newProduct.brand}
                         onChange={handleInputChange}
-                        className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                        className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
                         required
                       />
                     </div>
+                  </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-gray-300 mb-1">Category</label>
+                      <label htmlFor="category" className="block text-gray-400 text-sm font-medium mb-1">Category</label>
                       <select
+                        id="category"
                         name="category"
                         value={newProduct.category}
                         onChange={handleInputChange}
-                        className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                        className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary appearance-none pr-8"
                         required
                       >
                         <option value="sneakers">Sneakers</option>
                         <option value="watches">Watches</option>
                       </select>
                     </div>
-
                     <div>
-                      <label className="block text-gray-300 mb-1">Size</label>
-                      <input
-                        type="text"
-                        name="size"
-                        value={newProduct.size}
-                        onChange={handleInputChange}
-                        className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                        placeholder="US 10 / 42mm"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-300 mb-1">Price ($)</label>
-                      <input
-                        type="number"
-                        name="price"
-                        value={newProduct.price || ''}
-                        onChange={handleInputChange}
-                        className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                        min="0"
-                        step="0.01"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-300 mb-1">Original Price ($)</label>
-                      <input
-                        type="number"
-                        name="originalPrice"
-                        value={newProduct.originalPrice || ''}
-                        onChange={handleInputChange}
-                        className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                        min="0"
-                        step="0.01"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-300 mb-1">Condition</label>
-                      <select
-                        name="condition"
-                        value={newProduct.condition}
-                        onChange={handleInputChange}
-                        className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                        required
-                      >
-                        <option value="new">New</option>
-                        <option value="like new">Like New</option>
-                        <option value="excellent">Excellent</option>
-                        <option value="good">Good</option>
-                        <option value="fair">Fair</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-300 mb-1">Image URLs (comma-separated)</label>
+                      <label htmlFor="size" className="block text-gray-400 text-sm font-medium mb-1">Size (comma-separated)</label>
                       <textarea
-                        name="images"
-                        value={newProduct.images?.join(', ') || ''}
-                        onChange={handleImageInputChange}
-                        className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                        rows={3}
+                        id="size"
+                        name="size"
+                        value={Array.isArray(newProduct.size) ? newProduct.size.join(', ') : newProduct.size}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary h-20"
                         required
-                      ></textarea>
+                      />
                     </div>
                   </div>
 
-                  <div className="mb-6">
-                    <label className="block text-gray-300 mb-1">Description</label>
-                    <textarea
-                      name="description"
-                      value={newProduct.description}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="price" className="block text-gray-400 text-sm font-medium mb-1">Price ($)</label>
+                      <input
+                        type="number"
+                        id="price"
+                        name="price"
+                        value={newProduct.price}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+                        required
+                        step="0.01"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="originalPrice" className="block text-gray-400 text-sm font-medium mb-1">Original Price ($)</label>
+                      <input
+                        type="number"
+                        id="originalPrice"
+                        name="originalPrice"
+                        value={newProduct.originalPrice}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="condition" className="block text-gray-400 text-sm font-medium mb-1">Condition</label>
+                    <select
+                      id="condition"
+                      name="condition"
+                      value={newProduct.condition}
                       onChange={handleInputChange}
-                      className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none h-24"
+                      className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary appearance-none pr-8"
+                      required
+                    >
+                      <option value="new">New</option>
+                      <option value="like new">Like New</option>
+                      <option value="excellent">Excellent</option>
+                      <option value="good">Good</option>
+                      <option value="fair">Fair</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="images" className="block text-gray-400 text-sm font-medium mb-1">Image URLs (comma-separated)</label>
+                    <textarea
+                      id="images"
+                      name="images"
+                      value={newProduct.images.join(', ')}
+                      onChange={handleImageInputChange}
+                      className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary h-24"
                       required
                     />
                   </div>
 
-                  <div className="flex items-center mb-6">
+                  <div>
+                    <label htmlFor="description" className="block text-gray-400 text-sm font-medium mb-1">Description</label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={newProduct.description}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary h-32"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex items-center">
                     <input
                       type="checkbox"
+                      id="authenticated"
                       name="authenticated"
                       checked={newProduct.authenticated}
                       onChange={(e) => setNewProduct({ ...newProduct, authenticated: e.target.checked })}
-                      className="mr-2"
-                      id="authenticated-checkbox"
+                      className="h-4 w-4 text-primary bg-dark border-gray-700 rounded focus:ring-primary"
                     />
-                    <label htmlFor="authenticated-checkbox" className="text-gray-300">Authenticated</label>
+                    <label htmlFor="authenticated" className="ml-2 block text-gray-400 text-sm font-medium">Authenticated</label>
                   </div>
 
-                  <Button type="submit" variant="primary" loading={loading}>
-                    Add Product
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="md"
+                    disabled={loading}
+                  >
+                    {loading ? 'Adding Product...' : 'Add Product'}
                   </Button>
                 </form>
               </div>
@@ -569,131 +577,132 @@ const AdminPage = () => {
       </div>
 
       {editingProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-secondary p-6 rounded-lg w-full max-w-lg relative flex flex-col max-h-[90vh]">
-            <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-primary"
-              onClick={() => setEditingProduct(null)}
-            >
-              <X size={24} />
-            </button>
-            <h2 className="font-display text-xl text-primary mb-4">Edit Product</h2>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                // Ensure images array is not empty in edit form
-                if (!editForm.images || (Array.isArray(editForm.images) && editForm.images.length === 0) || (typeof editForm.images === 'string' && editForm.images.trim() === '')) {
-                  setError('At least one image URL is required.');
-                  return;
-                }
-
-                // Convert comma-separated string back to array if it's a string
-                const imagesToSend = typeof editForm.images === 'string'
-                  ? editForm.images.split(',').map(url => url.trim()).filter(url => url !== '')
-                  : editForm.images;
-
-                // Ensure imagesToSend is an array and not empty
-                if (!Array.isArray(imagesToSend) || imagesToSend.length === 0) {
-                  setError('At least one valid image URL is required.');
-                  return;
-                }
-
-                try {
-                  setLoading(true);
-                  await productService.updateProduct(editingProduct.id, { ...editForm, images: imagesToSend });
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-secondary rounded-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="font-display text-xl text-light">Edit Product</h2>
+              <button onClick={() => setEditingProduct(null)} className="text-gray-400 hover:text-primary">
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              // Handle edit submission
+              const updatedProduct = {
+                ...editingProduct,
+                ...editForm,
+                price: parseFloat(editForm.price as any),
+                originalPrice: parseFloat(editForm.originalPrice as any) || 0,
+                images: typeof editForm.images === 'string' ? editForm.images.split(',').map(url => url.trim()).filter(url => url !== '') : editForm.images,
+                size: typeof editForm.size === 'string' ? editForm.size.split(',').map(s => s.trim()).filter(s => s !== '') : editForm.size,
+              };
+              productService.updateProduct(editingProduct.id, {
+                ...editForm,
+                price: parseFloat(editForm.price as any),
+                originalPrice: parseFloat(editForm.originalPrice as any) || 0,
+                images: typeof editForm.images === 'string' ? editForm.images.split(',').map(url => url.trim()).filter(url => url !== '') : editForm.images,
+                size: typeof editForm.size === 'string' ? editForm.size.split(',').map(s => s.trim()).filter(s => s !== '') : editForm.size,
+              })
+                .then(() => {
                   setEditingProduct(null);
-                  await loadProducts();
-                } catch (err) {
-                  setError('Failed to update product');
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              className="flex flex-col flex-1 overflow-y-auto gap-4 pr-2"
-              style={{ maxHeight: '65vh' }}
-            >
-              <div>
-                <label className="block text-gray-300 mb-1">Product Name</label>
-                <input
-                  type="text"
-                  value={editForm.name || ''}
-                  onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                  required
-                />
+                  loadProducts(); // Reload products after editing
+                })
+                .catch(err => {
+                  console.error('Error updating product:', err);
+                  setError(err instanceof Error ? err.message : 'Failed to update product');
+                });
+            }} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="edit-name" className="block text-gray-400 text-sm font-medium mb-1">Product Name</label>
+                  <input
+                    type="text"
+                    id="edit-name"
+                    name="name"
+                    value={editForm.name || ''}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="edit-brand" className="block text-gray-400 text-sm font-medium mb-1">Brand</label>
+                  <input
+                    type="text"
+                    id="edit-brand"
+                    name="brand"
+                    value={editForm.brand || ''}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+                    required
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-gray-300 mb-1">Brand</label>
-                <input
-                  type="text"
-                  value={editForm.brand || ''}
-                  onChange={e => setEditForm({ ...editForm, brand: e.target.value })}
-                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                  required
-                />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="edit-category" className="block text-gray-400 text-sm font-medium mb-1">Category</label>
+                  <select
+                    id="edit-category"
+                    name="category"
+                    value={editForm.category || ''}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary appearance-none pr-8"
+                    required
+                  >
+                    <option value="sneakers">Sneakers</option>
+                    <option value="watches">Watches</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="edit-size" className="block text-gray-400 text-sm font-medium mb-1">Size (comma-separated)</label>
+                  <textarea
+                    id="edit-size"
+                    name="size"
+                    value={Array.isArray(editForm.size) ? editForm.size.join(', ') : (editForm.size || '')}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary h-20"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="edit-price" className="block text-gray-400 text-sm font-medium mb-1">Price ($)</label>
+                  <input
+                    type="number"
+                    id="edit-price"
+                    name="price"
+                    value={editForm.price || 0}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+                    required
+                    step="0.01"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="edit-originalPrice" className="block text-gray-400 text-sm font-medium mb-1">Original Price ($)</label>
+                  <input
+                    type="number"
+                    id="edit-originalPrice"
+                    name="originalPrice"
+                    value={editForm.originalPrice || 0}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+                    step="0.01"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-1">Category</label>
+                <label htmlFor="edit-condition" className="block text-gray-400 text-sm font-medium mb-1">Condition</label>
                 <select
-                  name="category"
-                  value={editForm.category}
-                  onChange={handleEditInputChange}
-                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                  required
-                >
-                  <option value="sneakers">Sneakers</option>
-                  <option value="watches">Watches</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-gray-300 mb-1">Size</label>
-                <input
-                  type="text"
-                  name="size"
-                  value={editForm.size || ''}
-                  onChange={handleEditInputChange}
-                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-300 mb-1">Price ($)</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={editForm.price || ''}
-                  onChange={handleEditInputChange}
-                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-300 mb-1">Original Price ($)</label>
-                <input
-                  type="number"
-                  name="originalPrice"
-                  value={editForm.originalPrice || ''}
-                  onChange={handleEditInputChange}
-                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-300 mb-1">Condition</label>
-                <select
+                  id="edit-condition"
                   name="condition"
-                  value={editForm.condition}
+                  value={editForm.condition || ''}
                   onChange={handleEditInputChange}
-                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
+                  className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary appearance-none pr-8"
                   required
                 >
                   <option value="new">New</option>
@@ -705,44 +714,48 @@ const AdminPage = () => {
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-1">Image URLs (comma-separated)</label>
-                {/* Check if editForm.images is an array before joining */}
+                <label htmlFor="edit-images" className="block text-gray-400 text-sm font-medium mb-1">Image URLs (comma-separated)</label>
                 <textarea
+                  id="edit-images"
                   name="images"
-                  value={Array.isArray(editForm.images) ? editForm.images.join(', ') : editForm.images || ''}
+                  value={Array.isArray(editForm.images) ? editForm.images.join(', ') : (editForm.images || '')}
                   onChange={handleEditImageInputChange}
-                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                  rows={3}
+                  className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary h-24"
                   required
-                ></textarea>
+                />
               </div>
 
-              <div className="mb-6">
-                <label className="block text-gray-300 mb-1">Description</label>
+              <div>
+                <label htmlFor="edit-description" className="block text-gray-400 text-sm font-medium mb-1">Description</label>
                 <textarea
+                  id="edit-description"
                   name="description"
                   value={editForm.description || ''}
                   onChange={handleEditInputChange}
-                  className="w-full bg-dark border border-gray-700 rounded px-3 py-2 text-light focus:border-primary focus:outline-none"
-                  rows={4}
+                  className="w-full px-3 py-2 bg-dark border border-gray-700 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary h-32"
                   required
-                ></textarea>
+                />
               </div>
 
-              <div className="flex items-center mb-6">
+              <div className="flex items-center">
                 <input
                   type="checkbox"
+                  id="edit-authenticated"
                   name="authenticated"
-                  checked={editForm.authenticated || false}
+                  checked={editForm.authenticated ?? true}
                   onChange={(e) => setEditForm({ ...editForm, authenticated: e.target.checked })}
-                  className="mr-2"
-                  id="edit-authenticated-checkbox"
+                  className="h-4 w-4 text-primary bg-dark border-gray-700 rounded focus:ring-primary"
                 />
-                <label htmlFor="edit-authenticated-checkbox" className="text-gray-300">Authenticated</label>
+                <label htmlFor="edit-authenticated" className="ml-2 block text-gray-400 text-sm font-medium">Authenticated</label>
               </div>
 
-              <Button type="submit" variant="primary" loading={loading}>
-                Save Changes
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                disabled={loading}
+              >
+                {loading ? 'Updating Product...' : 'Update Product'}
               </Button>
             </form>
           </div>

@@ -8,7 +8,7 @@ export interface Product {
   price: number;
   originalPrice: number;
   condition: 'new' | 'like new' | 'excellent' | 'good' | 'fair';
-  size: string;
+  size: string | string[];
   images: string[];
   description: string;
   authenticated: boolean;
@@ -19,6 +19,7 @@ export interface Product {
 export interface CartItem {
   product: Product;
   quantity: number;
+  selectedSize: string;
 }
 
 export interface WishlistItem {

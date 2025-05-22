@@ -7,6 +7,7 @@ import { Product } from '../types';
 import { productService } from '../services/productService';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const ProductDetail = () => {
     const { id } = useParams<{ id: string }>();
@@ -18,6 +19,7 @@ const ProductDetail = () => {
     const [quantity, setQuantity] = useState(1);
     const { addToCart } = useCart();
     const { addToWishlist, isInWishlist, removeFromWishlist } = useWishlist();
+    const { currentUser } = useAuth();
 
     useEffect(() => {
         loadProduct();
@@ -46,7 +48,6 @@ const ProductDetail = () => {
     const handleAddToCart = () => {
         if (product) {
             addToCart(product, quantity);
-            // Show success message or animation
         }
     };
 
@@ -239,8 +240,8 @@ const ProductDetail = () => {
                                 <button
                                     onClick={handleWishlistToggle}
                                     className={`p-3 rounded-md transition-colors ${isInWishlist(product.id)
-                                            ? 'bg-primary text-dark'
-                                            : 'bg-gray-800 text-light hover:bg-gray-700'
+                                        ? 'bg-primary text-dark'
+                                        : 'bg-gray-800 text-light hover:bg-gray-700'
                                         }`}
                                 >
                                     <Heart size={20} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />

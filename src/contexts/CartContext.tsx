@@ -36,7 +36,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Load cart from localStorage on initial render
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
+    if (currentUser) {
+      const savedCart = localStorage.getItem(`cart_${currentUser.uid}`);
     if (savedCart) {
       try {
         setCartItems(JSON.parse(savedCart));
@@ -45,12 +46,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCartItems([]);
       }
     }
-  }, []);
+    } else {
+      setCartItems([]);
+    }
+  }, [currentUser]);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
-  }, [cartItems]);
+    if (currentUser) {
+      localStorage.setItem(`cart_${currentUser.uid}`, JSON.stringify(cartItems));
+    }
+  }, [cartItems, currentUser]);
 
   // Execute pending cart action after successful authentication
   useEffect(() => {
@@ -83,10 +89,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const removeFromCart = (productId: string) => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
     setCartItems(prevItems => prevItems.filter(item => item.product.id !== productId));
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
@@ -100,6 +114,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const clearCart = () => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
     setCartItems([]);
   };
 

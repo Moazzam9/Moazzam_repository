@@ -4,6 +4,7 @@ import { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface ProductCardProps {
   product: Product;
@@ -14,13 +15,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist, removeFromWishlist } = useWishlist();
+  const { currentUser } = useAuth();
 
   const calculateDiscount = () => {
     const discount = ((product.originalPrice - product.price) / product.originalPrice) * 100;
     return Math.round(discount);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!currentUser) {
+      addToCart(product, 1); // This will trigger the auth modal through CartContext
+      return;
+    }
     addToCart(product, 1);
   };
 
@@ -100,7 +108,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleAddToCart();
+                handleAddToCart(e);
               }}
               className="bg-primary text-dark p-2 rounded-full hover:bg-accent transition-colors"
               aria-label="Add to cart"
