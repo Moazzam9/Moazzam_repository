@@ -13,6 +13,9 @@ export const Auth = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isAdminMode, setIsAdminMode] = useState(false);
+    const [name, setName] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [signupSuccess, setSignupSuccess] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -70,8 +73,21 @@ export const Auth = () => {
                 await login(email, password);
                 navigate(from, { replace: true });
             } else {
-                await signup(email, password);
-                navigate(from, { replace: true });
+                if (!name.trim()) {
+                    setError('Name is required');
+                    setIsLoading(false);
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    setError('Passwords do not match');
+                    setIsLoading(false);
+                    return;
+                }
+                await signup(email, password, name);
+                setSignupSuccess(true);
+                // Do not auto-login or redirect
+                setIsLoading(false);
+                return;
             }
         } catch (err: any) {
             setError(isLogin ? 'Failed to login' : 'Failed to create account');
@@ -119,63 +135,105 @@ export const Auth = () => {
                 )}
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    <div className="rounded-md shadow-sm -space-y-px">
-                        <div>
-                            <label htmlFor="email" className="sr-only">
-                                Email address
-                            </label>
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                required
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-primary/20 bg-secondary text-gray-200 placeholder-gray-400 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                                placeholder={isAdminMode ? "Admin email address" : "Email address"}
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
+                    {signupSuccess ? (
+                        <div className="bg-green-900/50 border border-green-500 text-green-200 px-4 py-3 rounded text-center">
+                            Please verify your email address to log in. Check your inbox for a verification email.
                         </div>
-                        <div>
-                            <label htmlFor="password" className="sr-only">
-                                Password
-                            </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-primary/20 bg-secondary text-gray-200 placeholder-gray-400 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
-                    </div>
+                    ) : (
+                        <>
+                            <div className="rounded-md shadow-sm -space-y-px">
+                                {!isLogin && !isAdminMode && (
+                                    <div>
+                                        <label htmlFor="name" className="sr-only">
+                                            Name
+                                        </label>
+                                        <input
+                                            id="name"
+                                            name="name"
+                                            type="text"
+                                            required
+                                            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-primary/20 bg-secondary text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                                            placeholder="Name"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                        />
+                                    </div>
+                                )}
+                                <div>
+                                    <label htmlFor="email" className="sr-only">
+                                        Email address
+                                    </label>
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        required
+                                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-primary/20 bg-secondary text-gray-200 placeholder-gray-400 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                                        placeholder={isAdminMode ? "Admin email address" : "Email address"}
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="password" className="sr-only">
+                                        Password
+                                    </label>
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        required
+                                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-primary/20 bg-secondary text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                                        placeholder="Password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                </div>
+                                {!isLogin && !isAdminMode && (
+                                    <div>
+                                        <label htmlFor="confirmPassword" className="sr-only">
+                                            Confirm Password
+                                        </label>
+                                        <input
+                                            id="confirmPassword"
+                                            name="confirmPassword"
+                                            type="password"
+                                            required
+                                            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-primary/20 bg-secondary text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                                            placeholder="Confirm Password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                        />
+                                    </div>
+                                )}
+                            </div>
 
-                    <div>
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-secondary bg-primary hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 transition-colors"
-                        >
-                            {isLoading
-                                ? 'Processing...'
-                                : isLogin
-                                    ? 'Sign in'
-                                    : 'Create account'}
-                        </button>
-                    </div>
+                            <div>
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-secondary bg-primary hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 transition-colors"
+                                >
+                                    {isLoading
+                                        ? 'Processing...'
+                                        : isLogin
+                                            ? 'Sign in'
+                                            : 'Create account'}
+                                </button>
+                            </div>
 
-                    {!isAdminMode && (
-                        <div>
-                            <button
-                                type="button"
-                                onClick={handleGoogleLogin}
-                                className="w-full flex justify-center py-2 px-4 border border-primary text-primary rounded-md shadow-sm text-sm font-medium bg-secondary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-                            >
-                                Continue with Google
-                            </button>
-                        </div>
+                            {!isAdminMode && (
+                                <div>
+                                    <button
+                                        type="button"
+                                        onClick={handleGoogleLogin}
+                                        className="w-full flex justify-center py-2 px-4 border border-primary text-primary rounded-md shadow-sm text-sm font-medium bg-secondary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                                    >
+                                        Continue with Google
+                                    </button>
+                                </div>
+                            )}
+                        </>
                     )}
                 </form>
 

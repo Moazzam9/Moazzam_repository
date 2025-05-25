@@ -20,7 +20,7 @@ import Blog from './pages/Blog';
 import Careers from './pages/Careers';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
-import Account from './pages/Account';
+import Dashboard from './pages/Dashboard';
 import ProductDetail from './pages/ProductDetail';
 
 function AppContent() {
@@ -39,7 +39,7 @@ function AppContent() {
           }
         />
         <Route path="/auth" element={<Auth />} />
-        <Route path="/account" element={<Account />} />
+        <Route path="/account" element={<Dashboard />} />
         <Route path="/new-arrivals" element={<NewArrivals />} />
         <Route path="/sale" element={<Sale />} />
         <Route path="/faq" element={<FAQ />} />

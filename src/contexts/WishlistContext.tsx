@@ -1,80 +1,104 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getDatabase, ref, set, remove, onValue, off } from 'firebase/database';
+import { useAuth } from './AuthContext';
 import { Product, WishlistItem } from '../types';
 
 interface WishlistContextType {
-  wishlistItems: WishlistItem[];
-  addToWishlist: (product: Product) => void;
-  removeFromWishlist: (productId: string) => void;
+  wishlistItems: Product[];
+  addToWishlist: (product: Product) => Promise<void>;
+  removeFromWishlist: (productId: string) => Promise<void>;
   isInWishlist: (productId: string) => boolean;
-  clearWishlist: () => void;
+  clearWishlist: () => Promise<void>;
+  loading: boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType>({
   wishlistItems: [],
-  addToWishlist: () => {},
-  removeFromWishlist: () => {},
+  addToWishlist: async () => { },
+  removeFromWishlist: async () => { },
   isInWishlist: () => false,
-  clearWishlist: () => {},
+  clearWishlist: async () => { },
+  loading: true,
 });
 
 export const useWishlist = () => useContext(WishlistContext);
 
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
 
-  // Load wishlist from localStorage on initial render
   useEffect(() => {
-    const savedWishlist = localStorage.getItem('wishlist');
-    if (savedWishlist) {
-      try {
-        setWishlistItems(JSON.parse(savedWishlist));
-      } catch (error) {
-        console.error('Error parsing wishlist data:', error);
-        setWishlistItems([]);
-      }
+    const db = getDatabase();
+    let wishlistRef;
+
+    if (!currentUser) {
+      setWishlistItems([]);
+      setLoading(false);
+      return;
     }
-  }, []);
 
-  // Save wishlist to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
-  }, [wishlistItems]);
-
-  const addToWishlist = (product: Product) => {
-    setWishlistItems(prevItems => {
-      const existingItem = prevItems.find(item => item.product.id === product.id);
-      
-      if (existingItem) {
-        return prevItems;
-      } else {
-        return [...prevItems, { product }];
-      }
+    wishlistRef = ref(db, `wishlist/${currentUser.uid}`);
+    const unsubscribe = onValue(wishlistRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      const items = Object.values(data);
+      setWishlistItems(items as Product[]);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching wishlist:", error);
+      setLoading(false);
     });
+
+    return () => {
+      if (wishlistRef) {
+        off(wishlistRef, 'value', unsubscribe);
+      }
+    };
+  }, [currentUser]);
+
+  const addToWishlist = async (product: Product) => {
+    if (!currentUser) {
+      console.warn("User not logged in. Cannot add to wishlist.");
+      return;
+    }
+    const db = getDatabase();
+    await set(ref(db, `wishlist/${currentUser.uid}/${product.id}`), product);
   };
 
-  const removeFromWishlist = (productId: string) => {
-    setWishlistItems(prevItems => prevItems.filter(item => item.product.id !== productId));
+  const removeFromWishlist = async (productId: string) => {
+    if (!currentUser) {
+      console.warn("User not logged in. Cannot remove from wishlist.");
+      return;
+    }
+    const db = getDatabase();
+    await remove(ref(db, `wishlist/${currentUser.uid}/${productId}`));
   };
 
   const isInWishlist = (productId: string) => {
-    return wishlistItems.some(item => item.product.id === productId);
+    return wishlistItems.some(item => item.id === productId);
   };
 
-  const clearWishlist = () => {
-    setWishlistItems([]);
+  const clearWishlist = async () => {
+    if (!currentUser) {
+      console.warn("User not logged in. Cannot clear wishlist.");
+      return;
+    }
+    const db = getDatabase();
+    await remove(ref(db, `wishlist/${currentUser.uid}`));
+  };
+
+  const value = {
+    wishlistItems,
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+    clearWishlist,
+    loading,
   };
 
   return (
-    <WishlistContext.Provider 
-      value={{ 
-        wishlistItems, 
-        addToWishlist, 
-        removeFromWishlist, 
-        isInWishlist, 
-        clearWishlist 
-      }}
-    >
-      {children}
+    <WishlistContext.Provider value={value}>
+      {!loading && children}
     </WishlistContext.Provider>
   );
 };
