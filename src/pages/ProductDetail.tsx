@@ -74,6 +74,30 @@ const ProductDetail = () => {
         navigate('/cart');
     };
 
+    const handleBuyNow = () => {
+        if (!currentUser) {
+            showAuthModal();
+            return;
+        }
+
+        if (!product) return;
+
+        if (!selectedSize) {
+            setError('Please select a size');
+            return;
+        }
+
+        // Assuming a simplified buy now that adds to cart and navigates to checkout immediately
+        addToCart({
+            ...product,
+            size: selectedSize,
+            quantity
+        });
+
+        // Navigate directly to checkout
+        navigate('/checkout');
+    };
+
     const handleWishlistToggle = () => {
         if (product) {
             if (isInWishlist(product.id)) {
@@ -241,8 +265,8 @@ const ProductDetail = () => {
                                                 type="button"
                                                 onClick={() => setSelectedSize(size)}
                                                 className={`border px-4 py-2 rounded transition-colors ${selectedSize === size
-                                                        ? 'border-primary bg-primary/10 text-primary'
-                                                        : 'border-gray-700 text-light hover:border-primary/50'
+                                                    ? 'border-primary bg-primary/10 text-primary'
+                                                    : 'border-gray-700 text-light hover:border-primary/50'
                                                     }`}
                                             >
                                                 {size}
@@ -293,6 +317,12 @@ const ProductDetail = () => {
                                 >
                                     <ShoppingCart size={20} />
                                     <span>Add to Cart</span>
+                                </button>
+                                <button
+                                    onClick={handleBuyNow}
+                                    className="flex-1 bg-accent text-dark px-6 py-3 rounded-md hover:bg-primary transition-colors flex items-center justify-center space-x-2 ml-4"
+                                >
+                                    <span>Buy Now</span>
                                 </button>
                                 <button
                                     onClick={handleWishlistToggle}

@@ -22,6 +22,8 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Dashboard from './pages/Dashboard';
 import ProductDetail from './pages/ProductDetail';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderCannotBePlaced from './pages/OrderCannotBePlaced';
 
 function AppContent() {
   const { showAuthModal, setShowAuthModal } = useCart();
@@ -52,6 +54,8 @@ function AppContent() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/order-disabled" element={<OrderCannotBePlaced />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
