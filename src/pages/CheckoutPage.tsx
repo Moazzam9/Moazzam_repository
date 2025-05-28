@@ -28,6 +28,7 @@ const CheckoutPage = () => {
     const [processingOrder, setProcessingOrder] = useState(false);
 
     useEffect(() => {
+        console.log("CheckoutPage useEffect running.");
         if (!currentUser) {
             // Redirect to login if not authenticated
             navigate('/auth');
@@ -43,14 +44,18 @@ const CheckoutPage = () => {
             if (data) {
                 const addressId = Object.keys(data)[0];
                 setShippingAddress({ addressId, ...data[addressId] });
+                console.log("Shipping address fetched:", data[addressId]);
             } else {
                 setShippingAddress(null); // No default address found
+                console.log("No default shipping address found.");
             }
             setLoading(false);
+            console.log("Loading set to false.");
         }, (err) => {
             console.error("Error fetching default address:", err);
             setError('Failed to load shipping address.');
             setLoading(false);
+            console.log("Loading set to false on error.");
         });
 
         // Also ensure cart items are loaded, though CartContext should handle this
@@ -58,6 +63,8 @@ const CheckoutPage = () => {
 
         return () => unsubscribe();
     }, [currentUser, navigate]);
+
+    console.log("CheckoutPage rendering. Loading:", loading, "Error:", error, "ShippingAddress:", shippingAddress);
 
     const handlePlaceOrder = () => {
         // Instead of processing the order, navigate to the disabled page
